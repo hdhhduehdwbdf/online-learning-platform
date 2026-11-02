@@ -1,0 +1,11 @@
+.env.local
+.DS_Store
+**/.DS_Store
+node_modules/
+.netlify/
+*.zip
+
+# Local logs and caches.
+*.log
+.cache/
+_backup_20261102/
