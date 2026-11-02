@@ -59,17 +59,20 @@ function parsePayload(event) {
   return JSON.parse(raw);
 }
 
-async function callDeepSeek(messages, temperature = 0.55) {
+async function callDeepSeek(messages, temperature = 0.55, maxTokens = 0) {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     return json(503, {
       error: "线上服务端还没有配置 DEEPSEEK_API_KEY。",
-      setup: "请在 Netlify Site configuration 的 Environment variables 中配置 DEEPSEEK_API_KEY。",
+      setup: "请在部署平台的 Environment variables 中配置 DEEPSEEK_API_KEY。",
     });
   }
 
+  const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/+$/, "");
+  const endpoint = baseUrl.endsWith("/chat/completions") ? baseUrl : `${baseUrl}/chat/completions`;
+
   try {
-    const upstream = await fetch("https://api.deepseek.com/chat/completions", {
+    const upstream = await fetch(endpoint, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -78,6 +81,7 @@ async function callDeepSeek(messages, temperature = 0.55) {
       body: JSON.stringify({
         model: process.env.DEEPSEEK_MODEL || "deepseek-chat",
         temperature,
+        ...(maxTokens > 0 ? { max_tokens: maxTokens } : {}),
         messages,
       }),
     });

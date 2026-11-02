@@ -1,0 +1,1902 @@
+{
+  "schemaVersion": "1.1",
+  "displayName": "知伴学境 UE 页面地图（全流程版）",
+  "source": {
+    "label": "online-learning-platform (localhost:5174)",
+    "sha256": "local-prototype-2026-11-02-full",
+    "runtime": "local-demo"
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "screens": [
+    {
+      "id": "LOG-01",
+      "module": "入口",
+      "title": "登录/注册弹窗",
+      "kind": "dialog",
+      "state": "default",
+      "entry": "首次打开站点自动弹出",
+      "purpose": "创建学习者身份并进入平台",
+      "evidence": {
+        "level": "observed",
+        "anchor": "index.html #login-dialog",
+        "testId": "T-01"
+      },
+      "preconditions": [
+        "localStorage 无 learningUser"
+      ],
+      "reads": [
+        "localStorage.learningUser"
+      ],
+      "writes": [
+        "localStorage.learningUser"
+      ],
+      "notes": [
+        "姓名必填，身份下拉（本科生/研究生/教师学习者/成人学习者），学习目标选填"
+      ],
+      "annotation": {
+        "layout": [
+          "居中模态弹窗，背景为模糊的平台首页"
+        ],
+        "entries": [
+          "进入平台 → 登录并自动弹出匹配测试（DIA-01）"
+        ],
+        "rules": [
+          "关闭按钮 × 可跳过登录，以未登录状态浏览"
+        ]
+      },
+      "capture": "screens/LOG-01.jpg",
+      "view": "screens/LOG-01.html"
+    },
+    {
+      "id": "DIA-01",
+      "module": "识别差异",
+      "title": "登录后自动弹出匹配测试",
+      "kind": "dialog",
+      "state": "auto-prompt",
+      "entry": "登录成功且未完成测试时自动弹出",
+      "purpose": "引导完成初始画像",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js openTestDialog",
+        "testId": "T-01"
+      },
+      "preconditions": [
+        "首次登录",
+        "answeredDimensionCount < 5"
+      ],
+      "reads": [],
+      "writes": [],
+      "notes": [
+        "与 DIA-02 同一弹窗的自动触发状态"
+      ],
+      "annotation": {
+        "layout": [
+          "大模态：左侧文案 + 右侧插画"
+        ],
+        "entries": [
+          "立即开始 → DIA-10（逐题作答）",
+          "稍后完成 → 关闭弹窗"
+        ],
+        "rules": [
+          "作答进度写入 learningProfileAnswers，5 维全部完成后不再自动弹出"
+        ]
+      },
+      "capture": "screens/DIA-01.jpg",
+      "view": "screens/DIA-01.html"
+    },
+    {
+      "id": "DIA-02",
+      "module": "识别差异",
+      "title": "AI学伴匹配测试·介绍",
+      "kind": "dialog",
+      "state": "default",
+      "entry": "首页「开始匹配测试」/ 顶栏「识别差异」",
+      "purpose": "说明测试构成并开始",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderTestIntro",
+        "testId": "T-03"
+      },
+      "preconditions": [],
+      "reads": [],
+      "writes": [],
+      "notes": [
+        "5 维度 × 20 量表项，1-5 分评分"
+      ],
+      "annotation": {
+        "layout": [
+          "大模态：左侧文案 + 右侧插画"
+        ],
+        "entries": [
+          "立即开始 → DIA-10",
+          "稍后完成 → 关闭弹窗"
+        ],
+        "rules": [
+          "与 DIA-01 为同一弹窗的手动/自动两种触发"
+        ]
+      },
+      "capture": "screens/DIA-02.jpg",
+      "view": "screens/DIA-02.html"
+    },
+    {
+      "id": "DIA-10",
+      "module": "识别差异",
+      "title": "量表作答·维度1 学习动机",
+      "kind": "dialog",
+      "state": "answering",
+      "entry": "介绍页「立即开始」",
+      "purpose": "逐题作答，完成 5 维画像输入",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderQuestionStep",
+        "testId": "T-03"
+      },
+      "preconditions": [
+        "已点击立即开始"
+      ],
+      "reads": [],
+      "writes": [
+        "learningProfileAnswers"
+      ],
+      "notes": [
+        "每维度 4 题，1-5 分李克特量表；顶部进度条显示维度进度"
+      ],
+      "annotation": {
+        "layout": [
+          "弹窗内单题居中，底部下一题按钮"
+        ],
+        "entries": [
+          "选中分值 → 高亮",
+          "下一题 → DIA-11"
+        ],
+        "rules": [
+          "作答后需点击「下一题」才会前进，不会自动跳转"
+        ]
+      },
+      "capture": "screens/DIA-10.jpg",
+      "view": "screens/DIA-10.html"
+    },
+    {
+      "id": "DIA-11",
+      "module": "识别差异",
+      "title": "量表作答·维度2 学习策略",
+      "kind": "dialog",
+      "state": "answering",
+      "entry": "维度1 完成后点「下一题」",
+      "purpose": "第 2 维作答",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderQuestionStep",
+        "testId": "T-03"
+      },
+      "preconditions": [
+        "维度1 已作答"
+      ],
+      "reads": [],
+      "writes": [
+        "learningProfileAnswers"
+      ],
+      "notes": [
+        "结构与维度1 相同，独立截图以覆盖全维度"
+      ],
+      "annotation": {
+        "layout": [
+          "同 DIA-10"
+        ],
+        "entries": [
+          "下一题 → DIA-12"
+        ],
+        "rules": []
+      },
+      "capture": "screens/DIA-11.jpg",
+      "view": "screens/DIA-11.html"
+    },
+    {
+      "id": "DIA-12",
+      "module": "识别差异",
+      "title": "量表作答·维度3 社会互动",
+      "kind": "dialog",
+      "state": "answering",
+      "entry": "维度2 完成后",
+      "purpose": "第 3 维作答",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderQuestionStep",
+        "testId": "T-03"
+      },
+      "preconditions": [
+        "维度2 已作答"
+      ],
+      "reads": [],
+      "writes": [
+        "learningProfileAnswers"
+      ],
+      "notes": [],
+      "annotation": {
+        "layout": [
+          "同 DIA-10"
+        ],
+        "entries": [
+          "下一题 → DIA-13"
+        ],
+        "rules": []
+      },
+      "capture": "screens/DIA-12.jpg",
+      "view": "screens/DIA-12.html"
+    },
+    {
+      "id": "DIA-13",
+      "module": "识别差异",
+      "title": "量表作答·维度4 知识迁移",
+      "kind": "dialog",
+      "state": "answering",
+      "entry": "维度3 完成后",
+      "purpose": "第 4 维作答",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderQuestionStep",
+        "testId": "T-03"
+      },
+      "preconditions": [
+        "维度3 已作答"
+      ],
+      "reads": [],
+      "writes": [
+        "learningProfileAnswers"
+      ],
+      "notes": [],
+      "annotation": {
+        "layout": [
+          "同 DIA-10"
+        ],
+        "entries": [
+          "下一题 → DIA-14"
+        ],
+        "rules": []
+      },
+      "capture": "screens/DIA-13.jpg",
+      "view": "screens/DIA-13.html"
+    },
+    {
+      "id": "DIA-14",
+      "module": "识别差异",
+      "title": "量表作答·维度5 自我调节",
+      "kind": "dialog",
+      "state": "answering",
+      "entry": "维度4 完成后",
+      "purpose": "第 5 维作答",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderQuestionStep",
+        "testId": "T-03"
+      },
+      "preconditions": [
+        "维度4 已作答"
+      ],
+      "reads": [],
+      "writes": [
+        "learningProfileAnswers"
+      ],
+      "notes": [
+        "最后一维的下一题按钮文案为「生成画像」"
+      ],
+      "annotation": {
+        "layout": [
+          "同 DIA-10"
+        ],
+        "entries": [
+          "生成画像 → DIA-20"
+        ],
+        "rules": []
+      },
+      "capture": "screens/DIA-14.jpg",
+      "view": "screens/DIA-14.html"
+    },
+    {
+      "id": "DIA-20",
+      "module": "识别差异",
+      "title": "识别结果·画像确认",
+      "kind": "dialog",
+      "state": "result",
+      "entry": "第 5 维点击「生成画像」",
+      "purpose": "展示五维画像、匹配主学伴与理由，请学习者确认",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderResult",
+        "testId": "T-03"
+      },
+      "preconditions": [
+        "5 维全部作答"
+      ],
+      "reads": [
+        "learningProfileAnswers"
+      ],
+      "writes": [
+        "matchedAgent"
+      ],
+      "notes": [
+        "五维分值条 + 匹配学伴结论"
+      ],
+      "annotation": {
+        "layout": [
+          "弹窗内结果视图：画像条形区 + 结论卡"
+        ],
+        "entries": [
+          "接受画像，开始学习 → HOM-01",
+          "重新测试 → 回到介绍页"
+        ],
+        "rules": [
+          "确认后写入 matchedAgent，首页/个人中心/工具页随之更新"
+        ]
+      },
+      "capture": "screens/DIA-20.jpg",
+      "view": "screens/DIA-20.html"
+    },
+    {
+      "id": "HOM-00",
+      "module": "课程首页",
+      "title": "课程首页·空画像",
+      "kind": "page",
+      "state": "empty-profile",
+      "entry": "登录后关闭测试弹窗 / 首次进入",
+      "purpose": "未识别画像时的首页状态",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderHomePage",
+        "testId": "T-02"
+      },
+      "preconditions": [
+        "matchedAgent 未设置"
+      ],
+      "reads": [
+        "courseList",
+        "learningProfileAnswers"
+      ],
+      "writes": [],
+      "notes": [
+        "指标卡中学伴显示「未匹配」，主按钮为「开始匹配测试」"
+      ],
+      "annotation": {
+        "layout": [
+          "左栏课程切换器+章节目录；右侧 hero + 指标卡"
+        ],
+        "entries": [
+          "开始匹配测试 → DIA-02",
+          "＋上传我的课程 → UPL-01",
+          "章节条目 → SEC-01"
+        ],
+        "rules": [
+          "画像未完成时学伴相关入口给出引导文案"
+        ]
+      },
+      "capture": "screens/HOM-00.jpg",
+      "view": "screens/HOM-00.html"
+    },
+    {
+      "id": "HOM-01",
+      "module": "课程首页",
+      "title": "课程首页·已匹配",
+      "kind": "page",
+      "state": "matched",
+      "entry": "画像确认后 / 随时从其他页返回",
+      "purpose": "总览课程与学习状态，进入章节或工具",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderHomePage",
+        "testId": "T-02"
+      },
+      "preconditions": [
+        "matchedAgent 已设置"
+      ],
+      "reads": [
+        "learningProfileAnswers",
+        "learningTelemetry",
+        "matchedAgent"
+      ],
+      "writes": [],
+      "notes": [
+        "指标卡：差异识别完成度 / 课程学习进度 / 当前AI学伴"
+      ],
+      "annotation": {
+        "layout": [
+          "左栏 260px 固定；hero 卡片占首屏，指标卡三列；章节目录侧栏内滚动"
+        ],
+        "entries": [
+          "查看我的画像 → PRF-01",
+          "查看匹配AI学伴 → AGT-01",
+          "反馈更新 → FDB-01",
+          "章节条目 → SEC-01"
+        ],
+        "rules": [
+          "按钮文案随画像状态切换"
+        ]
+      },
+      "capture": "screens/HOM-01.jpg",
+      "view": "screens/HOM-01.html"
+    },
+    {
+      "id": "PRF-00",
+      "module": "个人中心",
+      "title": "个人中心·空画像",
+      "kind": "dialog",
+      "state": "empty-profile",
+      "entry": "侧边栏头像 / 顶栏「个人中心」",
+      "purpose": "未识别画像时的个人中心状态",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderProfileDialog",
+        "testId": "T-12"
+      },
+      "preconditions": [
+        "matchedAgent 未设置"
+      ],
+      "reads": [
+        "learningUser"
+      ],
+      "writes": [],
+      "notes": [
+        "识别完成度 0/5，学伴显示「未匹配」"
+      ],
+      "annotation": {
+        "layout": [
+          "大模态：用户卡 + 三指标 + 画像雷达区为空态提示"
+        ],
+        "entries": [
+          "去识别差异 → DIA-02",
+          "× 关闭"
+        ],
+        "rules": []
+      },
+      "capture": "screens/PRF-00.jpg",
+      "view": "screens/PRF-00.html"
+    },
+    {
+      "id": "PRF-01",
+      "module": "个人中心",
+      "title": "个人中心·有画像",
+      "kind": "dialog",
+      "state": "matched",
+      "entry": "侧边栏头像（画像已完成）",
+      "purpose": "查看画像、雷达图与阶段报告入口",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderProfileDialog",
+        "testId": "T-12"
+      },
+      "preconditions": [
+        "matchedAgent 已设置"
+      ],
+      "reads": [
+        "learningUser",
+        "learningProfileAnswers",
+        "learningTelemetry"
+      ],
+      "writes": [],
+      "notes": [
+        "五维雷达图 + 识别差异结果 chips"
+      ],
+      "annotation": {
+        "layout": [
+          "用户卡 + 三指标 + 差异结果条 + 雷达图 + 操作行"
+        ],
+        "entries": [
+          "本两周学习阶段报告 → FDB-02",
+          "重新识别差异 → DIA-02",
+          "退出登录 → 清除 learningUser 回 LOG-01",
+          "× 关闭"
+        ],
+        "rules": [
+          "周报按钮仅在画像完成后可用"
+        ]
+      },
+      "capture": "screens/PRF-01.jpg",
+      "view": "screens/PRF-01.html"
+    },
+    {
+      "id": "SEC-01",
+      "module": "章节学习",
+      "title": "章节工作台·资源阅读（默认课程）",
+      "kind": "page",
+      "state": "default",
+      "entry": "侧边栏点击章节 / 首页章节条目",
+      "purpose": "阅读本章资源并向 AI 学伴提问",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderCourseWorkspace",
+        "testId": "T-04"
+      },
+      "preconditions": [],
+      "reads": [
+        "resourceMap[section]",
+        "sectionMessages"
+      ],
+      "writes": [
+        "learningTelemetry（资源打开埋点）",
+        "sectionMessages"
+      ],
+      "notes": [
+        "左：资源预览 iframe（PDF）+ 工具页签；右：章节 AI 对话区"
+      ],
+      "annotation": {
+        "layout": [
+          "双栏：左资源列（预览+工具页签），右 380px AI 对话栏",
+          "PDF 预览为浏览器原生 iframe，容器内滚动"
+        ],
+        "entries": [
+          "新窗口打开 → 原生 PDF 查看器",
+          "资源清单第2项（教材PDF）→ SEC-03",
+          "讨论 → SEC-02",
+          "提问并回车 → SEC-05",
+          "匹配AI学伴/任务表现/反馈更新 页签 → 对应工具页"
+        ],
+        "rules": [
+          "提问经 /api/section-chat，回答仅基于本章资源摘录；无依据时明确说明"
+        ]
+      },
+      "capture": "screens/SEC-01.jpg",
+      "view": "screens/SEC-01.html"
+    },
+    {
+      "id": "SEC-03",
+      "module": "章节学习",
+      "title": "章节工作台·第2资源（教材PDF）",
+      "kind": "page",
+      "state": "resource-2",
+      "entry": "侧边栏资源清单点击第 2 项",
+      "purpose": "切换预览到整本教材 PDF",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderResourcePreview",
+        "testId": "T-04"
+      },
+      "preconditions": [],
+      "reads": [
+        "resourceMap"
+      ],
+      "writes": [
+        "learningTelemetry"
+      ],
+      "notes": [
+        "侧边栏资源项选中态更新"
+      ],
+      "annotation": {
+        "layout": [
+          "同 SEC-01，预览区内容替换"
+        ],
+        "entries": [
+          "返回第 1 资源 → SEC-01",
+          "讨论 → SEC-02"
+        ],
+        "rules": []
+      },
+      "capture": "screens/SEC-03.jpg",
+      "view": "screens/SEC-03.html"
+    },
+    {
+      "id": "SEC-02",
+      "module": "章节学习",
+      "title": "章节讨论区",
+      "kind": "page",
+      "state": "discussion",
+      "entry": "侧边栏本章资源清单 → 讨论",
+      "purpose": "参与话题讨论并获 AI 整理支持",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderChapterDiscussion",
+        "testId": "T-05"
+      },
+      "preconditions": [],
+      "reads": [
+        "discussionPosts",
+        "sectionMessages"
+      ],
+      "writes": [
+        "discussionPosts",
+        "learningTelemetry"
+      ],
+      "notes": [
+        "右侧对话区自动切换为「共同讨论伙伴」"
+      ],
+      "annotation": {
+        "layout": [
+          "左：讨论题+发帖表单+帖子列表；右：讨论伙伴对话栏"
+        ],
+        "entries": [
+          "输入内容点发布 → SEC-04",
+          "让学伴帮我整理 → /api/agent-chat（discussion 人设）"
+        ],
+        "rules": [
+          "AI 不代发帖子，只整理表达"
+        ]
+      },
+      "capture": "screens/SEC-02.jpg",
+      "view": "screens/SEC-02.html"
+    },
+    {
+      "id": "SEC-04",
+      "module": "章节学习",
+      "title": "讨论区·发帖成功",
+      "kind": "page",
+      "state": "posted",
+      "entry": "讨论区输入文字并点发布",
+      "purpose": "发帖写入后的状态反馈",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js 讨论表单提交",
+        "testId": "T-05"
+      },
+      "preconditions": [
+        "讨论区已输入文字"
+      ],
+      "reads": [],
+      "writes": [
+        "discussionPosts",
+        "learningTelemetry"
+      ],
+      "notes": [
+        "新帖子追加到列表顶部，输入框清空"
+      ],
+      "annotation": {
+        "layout": [
+          "同 SEC-02，帖子列表多一条"
+        ],
+        "entries": [
+          "继续发帖或切回资源"
+        ],
+        "rules": [
+          "发帖计入遥测，影响反馈页指标"
+        ]
+      },
+      "capture": "screens/SEC-04.jpg",
+      "view": "screens/SEC-04.html"
+    },
+    {
+      "id": "SEC-05",
+      "module": "章节学习",
+      "title": "章节问答·发送中",
+      "kind": "page",
+      "state": "asking",
+      "entry": "右侧对话栏输入问题并发送",
+      "purpose": "AI 回答生成中的即时反馈",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js sendSectionMessage",
+        "testId": "T-05"
+      },
+      "preconditions": [],
+      "reads": [
+        "resourceIndex"
+      ],
+      "writes": [
+        "sectionMessages"
+      ],
+      "notes": [
+        "气泡显示「思考中」动效，输入框禁用"
+      ],
+      "annotation": {
+        "layout": [
+          "同 SEC-01，对话区新增用户气泡+加载气泡"
+        ],
+        "entries": [
+          "等待回答 → SEC-06"
+        ],
+        "rules": [
+          "请求经 /api/section-chat，超时或失败在气泡内提示"
+        ]
+      },
+      "capture": "screens/SEC-05.jpg",
+      "view": "screens/SEC-05.html"
+    },
+    {
+      "id": "SEC-06",
+      "module": "章节学习",
+      "title": "章节问答·AI 回答（Markdown 渲染）",
+      "kind": "page",
+      "state": "answered",
+      "entry": "发送中状态约 20-40s 后",
+      "purpose": "基于本章资源的引用式回答",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderMarkdown",
+        "testId": "T-05"
+      },
+      "preconditions": [
+        "已提问"
+      ],
+      "reads": [],
+      "writes": [
+        "sectionMessages",
+        "learningTelemetry"
+      ],
+      "notes": [
+        "回答含教材页码引用，加粗/列表按 Markdown 渲染"
+      ],
+      "annotation": {
+        "layout": [
+          "同 SEC-01，AI 气泡完整显示"
+        ],
+        "entries": [
+          "继续追问（多轮）",
+          "切换其他资源"
+        ],
+        "rules": [
+          "回答仅用本章摘录；上传课程注入该章全文（≤28000 字符）"
+        ]
+      },
+      "capture": "screens/SEC-06.jpg",
+      "view": "screens/SEC-06.html"
+    },
+    {
+      "id": "SEC-10",
+      "module": "章节学习",
+      "title": "上传课程·章节文本视图",
+      "kind": "page",
+      "state": "uploaded-section",
+      "entry": "上传课程激活后点击章节",
+      "purpose": "阅读 AI 拆章摘要与该章全文",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js mountChapterText",
+        "testId": "T-10"
+      },
+      "preconditions": [
+        "activeCourse 为上传课程"
+      ],
+      "reads": [
+        "IndexedDB chapterTexts"
+      ],
+      "writes": [
+        "learningTelemetry"
+      ],
+      "notes": [
+        "无 PDF 预览，改为章节摘要卡 + 章节全文 pre"
+      ],
+      "annotation": {
+        "layout": [
+          "左栏摘要卡+全文滚动区；右栏同章节 AI 对话"
+        ],
+        "entries": [
+          "提问 → 走 SEC-05/06 流程（注入全文）",
+          "切回默认课程 → HOM-01"
+        ],
+        "rules": [
+          "章节文本自 IndexedDB 读取，刷新后仍在"
+        ]
+      },
+      "capture": "screens/SEC-10.jpg",
+      "view": "screens/SEC-10.html"
+    },
+    {
+      "id": "AGT-01",
+      "module": "匹配支持",
+      "title": "匹配AI学伴",
+      "kind": "page",
+      "state": "default",
+      "entry": "顶部按钮 / 工具页签",
+      "purpose": "查看当前主学伴、匹配原因与协调器机制",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderToolPage agent",
+        "testId": "T-06"
+      },
+      "preconditions": [],
+      "reads": [
+        "matchedAgent",
+        "learningProfileAnswers",
+        "coordinatorDecisions"
+      ],
+      "writes": [
+        "agentMessages",
+        "coordinatorDecisions"
+      ],
+      "notes": [
+        "四类学伴说明卡 + 匹配原因卡 + Coordinator 流程说明 + 底部对话区"
+      ],
+      "annotation": {
+        "layout": [
+          "单列长页面：主学伴卡 → 匹配指标 → 协调器说明 → 对话区"
+        ],
+        "entries": [
+          "发送问题 → AGT-02（含协调器决策卡）",
+          "任务表现 / 反馈更新页签 → 对应工具页"
+        ],
+        "rules": [
+          "每轮回答前协调器先输出结构化 JSON，以徽章展示；解析失败回退关键词路由"
+        ]
+      },
+      "capture": "screens/AGT-01.jpg",
+      "view": "screens/AGT-01.html"
+    },
+    {
+      "id": "AGT-02",
+      "module": "匹配支持",
+      "title": "学伴对话·协调器决策卡",
+      "kind": "page",
+      "state": "coordinator-answered",
+      "entry": "学伴页输入问题发送，等待回答",
+      "purpose": "展示主/辅学伴路由决策与支持策略",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js /api/coordinator-chat 渲染",
+        "testId": "T-06"
+      },
+      "preconditions": [
+        "已发送问题"
+      ],
+      "reads": [],
+      "writes": [
+        "agentMessages",
+        "coordinatorDecisions"
+      ],
+      "notes": [
+        "决策卡：主学伴、辅助学伴、判断理由、支持策略"
+      ],
+      "annotation": {
+        "layout": [
+          "决策卡浅绿底置于回答气泡上方"
+        ],
+        "entries": [
+          "继续对话（决策卡每轮更新）",
+          "切换其他工具页"
+        ],
+        "rules": [
+          "路由失败时徽章显示回退规则结果"
+        ]
+      },
+      "capture": "screens/AGT-02.jpg",
+      "view": "screens/AGT-02.html"
+    },
+    {
+      "id": "TSK-00",
+      "module": "任务表现",
+      "title": "任务表现·情境任务",
+      "kind": "page",
+      "state": "default",
+      "entry": "顶部按钮 / 工具页签",
+      "purpose": "完成真实情境任务：分析背景、回应问题、拆解步骤",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderToolPage tasks",
+        "testId": "T-07"
+      },
+      "preconditions": [],
+      "reads": [
+        "taskScenarios",
+        "selectedScenario",
+        "taskCompanionDialogs"
+      ],
+      "writes": [
+        "scenarioSupportInputs",
+        "learningTelemetry"
+      ],
+      "notes": [
+        "左侧任务列表 4 个情境，右侧任务详情（知识点/情境背景/待回应问题/任务拆解）"
+      ],
+      "annotation": {
+        "layout": [
+          "左任务列表固定宽，右详情区两列卡片"
+        ],
+        "entries": [
+          "切换任务 → 更新右侧详情",
+          "查看提示 → TSK-03",
+          "首次进入自动弹 TSK-02"
+        ],
+        "rules": [
+          "提醒弹窗对每任务+章节组合只弹一次"
+        ]
+      },
+      "capture": "screens/TSK-00.jpg",
+      "view": "screens/TSK-00.html"
+    },
+    {
+      "id": "TSK-02",
+      "module": "任务表现",
+      "title": "任务学伴提醒弹窗",
+      "kind": "dialog",
+      "state": "auto-trigger",
+      "entry": "进入任务表现页自动弹出",
+      "purpose": "任务开始前给出复习与规划建议",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js openTaskCompanionDialog",
+        "testId": "T-08"
+      },
+      "preconditions": [
+        "当前章节+任务组合未确认过提醒"
+      ],
+      "reads": [
+        "knowledgeBaseText"
+      ],
+      "writes": [
+        "taskCompanionDialogs"
+      ],
+      "notes": [
+        "概念理解伙伴（可开始复习）与任务规划伙伴（含截止日期）双卡"
+      ],
+      "annotation": {
+        "layout": [
+          "居中模态，左右双卡"
+        ],
+        "entries": [
+          "开始复习 → 展开复习卡片",
+          "直接进入任务 → 关闭弹窗"
+        ],
+        "rules": [
+          "关闭后不再对同一任务组合弹出"
+        ]
+      },
+      "capture": "screens/TSK-02.jpg",
+      "view": "screens/TSK-02.html"
+    },
+    {
+      "id": "TSK-03",
+      "module": "任务表现",
+      "title": "任务提醒·手动重开",
+      "kind": "dialog",
+      "state": "reopened",
+      "entry": "任务详情卡点「查看提示」",
+      "purpose": "错过或关闭提醒后再次查看",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js 查看提示按钮",
+        "testId": "T-08"
+      },
+      "preconditions": [
+        "已在任务页"
+      ],
+      "reads": [],
+      "writes": [],
+      "notes": [
+        "与 TSK-02 同一弹窗，手动触发"
+      ],
+      "annotation": {
+        "layout": [
+          "同 TSK-02"
+        ],
+        "entries": [
+          "开始复习 / 直接进入任务"
+        ],
+        "rules": [
+          "手动重开不写入 taskCompanionDialogs（不抑制后续自动弹窗逻辑）"
+        ]
+      },
+      "capture": "screens/TSK-03.jpg",
+      "view": "screens/TSK-03.html"
+    },
+    {
+      "id": "FDB-01",
+      "module": "反馈更新",
+      "title": "反馈更新",
+      "kind": "page",
+      "state": "default",
+      "entry": "顶部按钮 / 工具页签",
+      "purpose": "查看两周学习周期报告与画像更新",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderDynamicPanel",
+        "testId": "T-09"
+      },
+      "preconditions": [],
+      "reads": [
+        "learningTelemetry",
+        "learningProfileAnswers"
+      ],
+      "writes": [
+        "supportAdjustmentStatus"
+      ],
+      "notes": [
+        "四维指标（知识理解/任务过程/社会互动/能力发展）+ 数据来源 + 阶段诊断规则"
+      ],
+      "annotation": {
+        "layout": [
+          "顶部闭环步骤条，四指标卡一行四列，下方数据来源与规则两列"
+        ],
+        "entries": [
+          "个人中心内「本两周学习阶段报告」→ FDB-02"
+        ],
+        "rules": [
+          "反馈闭环：数据采集→画像更新→支持再匹配→学习者确认"
+        ]
+      },
+      "capture": "screens/FDB-01.jpg",
+      "view": "screens/FDB-01.html"
+    },
+    {
+      "id": "FDB-02",
+      "module": "反馈更新",
+      "title": "本两周学习阶段报告弹窗",
+      "kind": "dialog",
+      "state": "weekly-report",
+      "entry": "个人中心「本两周学习阶段报告」按钮",
+      "purpose": "闭环第 4 步：向学习者呈现画像变化并请确认支持调整",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderWeeklyReportDialog",
+        "testId": "T-09"
+      },
+      "preconditions": [
+        "画像已完成"
+      ],
+      "reads": [
+        "learningTelemetry",
+        "dynamicDimensionValues",
+        "profileRadarValues"
+      ],
+      "writes": [
+        "supportAdjustmentStatus"
+      ],
+      "notes": [
+        "四阶段步骤条（数据采集/画像更新/支持再匹配/学习者确认）+ 优势/困难/画像变化/AI支持调整四卡 + 下一步建议"
+      ],
+      "annotation": {
+        "layout": [
+          "宽模态：顶部闭环步骤条，中部 2×2 卡，底部建议列表"
+        ],
+        "entries": [
+          "确认调整 → 关闭弹窗，进入下一周期",
+          "暂缓 → 关闭弹窗不写入"
+        ],
+        "rules": [
+          "确认/暂缓写入 supportAdjustmentStatus，影响下一周期支持策略"
+        ]
+      },
+      "capture": "screens/FDB-02.jpg",
+      "view": "screens/FDB-02.html"
+    },
+    {
+      "id": "UPL-01",
+      "module": "课程上传",
+      "title": "上传课程弹窗",
+      "kind": "dialog",
+      "state": "default",
+      "entry": "侧边栏课程切换器 ＋ / 首页「＋上传我的课程」",
+      "purpose": "上传教材 PDF 自动拆章建课",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js renderUploadIntro",
+        "testId": "T-10"
+      },
+      "preconditions": [],
+      "reads": [
+        "courseList"
+      ],
+      "writes": [
+        "IndexedDB zbxk-courses",
+        "courseList",
+        "activeCourse"
+      ],
+      "notes": [
+        "点击虚线区选择文件，仅接受 .pdf",
+        "提示：扫描版 PDF 可能无法提取文字"
+      ],
+      "annotation": {
+        "layout": [
+          "居中模态：说明 + 拖放区 + 进度区（初始隐藏）"
+        ],
+        "entries": [
+          "点击选择 PDF → UPL-02",
+          "× 关闭 → 取消上传"
+        ],
+        "rules": [
+          "PDF 原文与章节文本存浏览器 IndexedDB；课程列表与当前选中存 localStorage"
+        ]
+      },
+      "capture": "screens/UPL-01.jpg",
+      "view": "screens/UPL-01.html"
+    },
+    {
+      "id": "UPL-02",
+      "module": "课程上传",
+      "title": "上传·抽取文本中",
+      "kind": "dialog",
+      "state": "extracting",
+      "entry": "选择文件后自动进入",
+      "purpose": "反馈 pdf.js 逐页抽取进度",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js handleUploadFile",
+        "testId": "T-10"
+      },
+      "preconditions": [
+        "已选择文字版 PDF"
+      ],
+      "reads": [],
+      "writes": [
+        "courseList(status=processing)"
+      ],
+      "notes": [
+        "进度条随页数推进"
+      ],
+      "annotation": {
+        "layout": [
+          "弹窗内进度条 + 阶段文案"
+        ],
+        "entries": [],
+        "rules": [
+          "扫描版无文字时提示失败并移除记录"
+        ]
+      },
+      "capture": "screens/UPL-02.jpg",
+      "view": "screens/UPL-02.html"
+    },
+    {
+      "id": "UPL-04",
+      "module": "课程上传",
+      "title": "上传·AI 校准章节中",
+      "kind": "dialog",
+      "state": "ai-refining",
+      "entry": "规则拆分完成后自动进入",
+      "purpose": "LLM 校准章节标题与摘要",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js aiRefineChapters",
+        "testId": "T-10"
+      },
+      "preconditions": [
+        "规则拆分产出 ≥1 章"
+      ],
+      "reads": [],
+      "writes": [
+        "courseList(status=processing)"
+      ],
+      "notes": [
+        "无 API Key 或请求失败时自动跳过（静默降级）"
+      ],
+      "annotation": {
+        "layout": [
+          "同 UPL-02，文案切换为 AI 校准阶段"
+        ],
+        "entries": [],
+        "rules": [
+          "AI 校准失败不影响功能，降级为纯规则拆分"
+        ]
+      },
+      "capture": "screens/UPL-04.jpg",
+      "view": "screens/UPL-04.html"
+    },
+    {
+      "id": "UPL-03",
+      "module": "课程上传",
+      "title": "上传完成·自动切换课程",
+      "kind": "page",
+      "state": "uploaded-active",
+      "entry": "拆章完成后自动关闭弹窗并切换",
+      "purpose": "进入新课程学习",
+      "evidence": {
+        "level": "observed",
+        "anchor": "app.js switchCourse",
+        "testId": "T-10"
+      },
+      "preconditions": [
+        "拆章成功"
+      ],
+      "reads": [
+        "courseList"
+      ],
+      "writes": [
+        "activeCourse",
+        "selectedSection 重置"
+      ],
+      "notes": [
+        "侧边栏出现新课程（N 章 · 上传课程），章节列表替换；默认课程仍在列表中"
+      ],
+      "annotation": {
+        "layout": [
+          "同课程首页结构，内容切换为上传课程"
+        ],
+        "entries": [
+          "点击章节 → SEC-10",
+          "点击默认课程条目 → HOM-01"
+        ],
+        "rules": [
+          "每章资源=「AI拆章摘要+章节文本」；章节问答直接注入该章全文"
+        ]
+      },
+      "capture": "screens/UPL-03.jpg",
+      "view": "screens/UPL-03.html"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TR-01",
+      "from": "LOG-01",
+      "to": "DIA-01",
+      "trigger": "填写姓名点击「进入平台」",
+      "preconditions": [
+        "未完成匹配测试"
+      ],
+      "read": [
+        "learningUser"
+      ],
+      "write": [
+        "localStorage.learningUser"
+      ],
+      "effect": "登录并自动弹出匹配测试",
+      "feedback": "弹窗切换为测试介绍",
+      "failure": "未验证",
+      "recovery": "可关闭弹窗稍后再测",
+      "evidence": "observed",
+      "testId": "T-01"
+    },
+    {
+      "id": "TR-02",
+      "from": "HOM-00",
+      "to": "DIA-02",
+      "trigger": "点击「开始匹配测试」",
+      "preconditions": [],
+      "read": [],
+      "write": [],
+      "effect": "打开测试介绍弹窗",
+      "feedback": "模态弹出",
+      "failure": "未验证",
+      "recovery": "× 关闭",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-30",
+      "from": "DIA-02",
+      "to": "DIA-10",
+      "trigger": "点击「立即开始」",
+      "preconditions": [],
+      "read": [],
+      "write": [],
+      "effect": "进入第 1 维作答",
+      "feedback": "弹窗内容切换为量表题",
+      "failure": "未验证",
+      "recovery": "稍后完成可退出",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-31",
+      "from": "DIA-10",
+      "to": "DIA-11",
+      "trigger": "完成 4 题后点「下一题」",
+      "preconditions": [
+        "当前维 4 题已选分"
+      ],
+      "read": [],
+      "write": [
+        "learningProfileAnswers"
+      ],
+      "effect": "进入维度 2",
+      "feedback": "题目与进度条更新",
+      "failure": "未选分时按钮不可用",
+      "recovery": "补选后继续",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-32",
+      "from": "DIA-11",
+      "to": "DIA-12",
+      "trigger": "维度2 完成",
+      "preconditions": [
+        "维度2 已作答"
+      ],
+      "read": [],
+      "write": [
+        "learningProfileAnswers"
+      ],
+      "effect": "进入维度 3",
+      "feedback": "同上",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-33",
+      "from": "DIA-12",
+      "to": "DIA-13",
+      "trigger": "维度3 完成",
+      "preconditions": [
+        "维度3 已作答"
+      ],
+      "read": [],
+      "write": [
+        "learningProfileAnswers"
+      ],
+      "effect": "进入维度 4",
+      "feedback": "同上",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-34",
+      "from": "DIA-13",
+      "to": "DIA-14",
+      "trigger": "维度4 完成",
+      "preconditions": [
+        "维度4 已作答"
+      ],
+      "read": [],
+      "write": [
+        "learningProfileAnswers"
+      ],
+      "effect": "进入维度 5",
+      "feedback": "同上",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-35",
+      "from": "DIA-14",
+      "to": "DIA-20",
+      "trigger": "维度5 完成，点「生成画像」",
+      "preconditions": [
+        "5 维全部作答"
+      ],
+      "read": [
+        "learningProfileAnswers"
+      ],
+      "write": [
+        "matchedAgent"
+      ],
+      "effect": "生成画像并展示识别结果",
+      "feedback": "结果视图呈现五维分值与匹配学伴",
+      "failure": "未验证",
+      "recovery": "可重新测试",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-36",
+      "from": "DIA-20",
+      "to": "HOM-01",
+      "trigger": "点击「接受画像，开始学习」",
+      "preconditions": [],
+      "read": [],
+      "write": [],
+      "effect": "关闭弹窗，首页按已匹配状态渲染",
+      "feedback": "指标卡学伴名更新",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-03"
+    },
+    {
+      "id": "TR-40",
+      "from": "HOM-01",
+      "to": "PRF-01",
+      "trigger": "点击侧边栏头像（个人中心）",
+      "preconditions": [],
+      "read": [
+        "learningUser"
+      ],
+      "write": [],
+      "effect": "打开个人中心弹窗",
+      "feedback": "模态弹出",
+      "failure": "未验证",
+      "recovery": "× 关闭",
+      "evidence": "observed",
+      "testId": "T-12"
+    },
+    {
+      "id": "TR-41",
+      "from": "PRF-01",
+      "to": "FDB-02",
+      "trigger": "点击「本两周学习阶段报告」",
+      "preconditions": [
+        "画像已完成"
+      ],
+      "read": [
+        "learningTelemetry"
+      ],
+      "write": [],
+      "effect": "打开周报弹窗",
+      "feedback": "模态弹出",
+      "failure": "未验证",
+      "recovery": "× 关闭",
+      "evidence": "observed",
+      "testId": "T-09"
+    },
+    {
+      "id": "TR-42",
+      "from": "PRF-01",
+      "to": "DIA-02",
+      "trigger": "点击「重新识别差异」",
+      "preconditions": [],
+      "read": [],
+      "write": [],
+      "effect": "重开测试介绍",
+      "feedback": "模态切换",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-12"
+    },
+    {
+      "id": "TR-43",
+      "from": "PRF-01",
+      "to": "LOG-01",
+      "trigger": "点击「退出登录」",
+      "preconditions": [],
+      "read": [],
+      "write": [
+        "清除 learningUser"
+      ],
+      "effect": "回到登录弹窗",
+      "feedback": "页面重载",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "source",
+      "testId": "T-12"
+    },
+    {
+      "id": "TR-03",
+      "from": "HOM-01",
+      "to": "SEC-01",
+      "trigger": "点击侧边栏章节 / 首页章节条目",
+      "preconditions": [],
+      "read": [
+        "resourceMap"
+      ],
+      "write": [
+        "learningTelemetry"
+      ],
+      "effect": "进入章节工作台，预览该章首个资源",
+      "feedback": "页面切换+侧边栏资源清单展开",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-04"
+    },
+    {
+      "id": "TR-50",
+      "from": "SEC-01",
+      "to": "SEC-03",
+      "trigger": "侧边栏资源清单点击第 2 项（教材PDF）",
+      "preconditions": [],
+      "read": [
+        "resourceMap"
+      ],
+      "write": [
+        "learningTelemetry"
+      ],
+      "effect": "预览区切换为整本教材",
+      "feedback": "iframe 内容替换",
+      "failure": "未验证",
+      "recovery": "点回第 1 项",
+      "evidence": "observed",
+      "testId": "T-04"
+    },
+    {
+      "id": "TR-04",
+      "from": "SEC-01",
+      "to": "SEC-02",
+      "trigger": "侧边栏资源清单点击「讨论」",
+      "preconditions": [],
+      "read": [
+        "discussionPosts"
+      ],
+      "write": [
+        "learningTelemetry.enteredDiscussion"
+      ],
+      "effect": "左栏切换为讨论区，右侧换共同讨论伙伴",
+      "feedback": "内容区即时切换",
+      "failure": "未验证",
+      "recovery": "点击其他资源切回",
+      "evidence": "observed",
+      "testId": "T-05"
+    },
+    {
+      "id": "TR-51",
+      "from": "SEC-02",
+      "to": "SEC-04",
+      "trigger": "输入内容并点「发布」",
+      "preconditions": [
+        "输入非空"
+      ],
+      "read": [],
+      "write": [
+        "discussionPosts"
+      ],
+      "effect": "帖子追加到列表",
+      "feedback": "列表即时更新+输入框清空",
+      "failure": "空输入不发",
+      "recovery": "重新输入",
+      "evidence": "observed",
+      "testId": "T-05"
+    },
+    {
+      "id": "TR-52",
+      "from": "SEC-01",
+      "to": "SEC-05",
+      "trigger": "对话栏输入问题点发送",
+      "preconditions": [],
+      "read": [
+        "resourceIndex"
+      ],
+      "write": [
+        "sectionMessages"
+      ],
+      "effect": "显示用户气泡与思考中状态",
+      "feedback": "加载动效",
+      "failure": "接口失败时气泡内报错",
+      "recovery": "重新提问",
+      "evidence": "observed",
+      "testId": "T-05"
+    },
+    {
+      "id": "TR-53",
+      "from": "SEC-05",
+      "to": "SEC-06",
+      "trigger": "AI 回答返回",
+      "preconditions": [],
+      "read": [],
+      "write": [
+        "sectionMessages"
+      ],
+      "effect": "Markdown 渲染回答（含教材页码引用）",
+      "feedback": "气泡内容替换加载态",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-05"
+    },
+    {
+      "id": "TR-05",
+      "from": "HOM-01",
+      "to": "AGT-01",
+      "trigger": "点击「匹配AI学伴」",
+      "preconditions": [],
+      "read": [
+        "matchedAgent"
+      ],
+      "write": [],
+      "effect": "切换到学伴工具页",
+      "feedback": "页面切换",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-06"
+    },
+    {
+      "id": "TR-54",
+      "from": "AGT-01",
+      "to": "AGT-02",
+      "trigger": "输入问题发送，协调器返回",
+      "preconditions": [],
+      "read": [],
+      "write": [
+        "agentMessages",
+        "coordinatorDecisions"
+      ],
+      "effect": "决策卡+回答气泡展示",
+      "feedback": "主/辅学伴徽章+判断理由+支持策略",
+      "failure": "JSON 解析失败回退关键词路由",
+      "recovery": "回退仍可回答",
+      "evidence": "observed",
+      "testId": "T-06"
+    },
+    {
+      "id": "TR-06",
+      "from": "AGT-01",
+      "to": "TSK-00",
+      "trigger": "点击「任务表现」页签",
+      "preconditions": [],
+      "read": [
+        "taskScenarios"
+      ],
+      "write": [
+        "learningTelemetry.openedTaskPanel"
+      ],
+      "effect": "切换到任务表现并弹出学伴提醒（TSK-02）",
+      "feedback": "弹窗自动弹出",
+      "failure": "未验证",
+      "recovery": "关闭后不再弹出",
+      "evidence": "observed",
+      "testId": "T-07"
+    },
+    {
+      "id": "TR-55",
+      "from": "TSK-00",
+      "to": "TSK-03",
+      "trigger": "任务详情点「查看提示」",
+      "preconditions": [],
+      "read": [],
+      "write": [],
+      "effect": "重开提醒弹窗",
+      "feedback": "模态弹出",
+      "failure": "未验证",
+      "recovery": "关闭",
+      "evidence": "observed",
+      "testId": "T-08"
+    },
+    {
+      "id": "TR-07",
+      "from": "HOM-01",
+      "to": "FDB-01",
+      "trigger": "点击「反馈更新」",
+      "preconditions": [],
+      "read": [
+        "learningTelemetry"
+      ],
+      "write": [],
+      "effect": "查看两周画像更新报告",
+      "feedback": "页面切换",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-09"
+    },
+    {
+      "id": "TR-08",
+      "from": "HOM-01",
+      "to": "UPL-01",
+      "trigger": "点击侧边栏 ＋ 或首页「＋上传我的课程」",
+      "preconditions": [],
+      "read": [
+        "courseList"
+      ],
+      "write": [],
+      "effect": "打开上传弹窗",
+      "feedback": "模态弹出",
+      "failure": "未验证",
+      "recovery": "× 取消",
+      "evidence": "observed",
+      "testId": "T-10"
+    },
+    {
+      "id": "TR-09",
+      "from": "UPL-01",
+      "to": "UPL-02",
+      "trigger": "选择 PDF 文件",
+      "preconditions": [
+        "文件为 PDF"
+      ],
+      "read": [],
+      "write": [
+        "courseList(processing)"
+      ],
+      "effect": "开始抽取文本",
+      "feedback": "进度条逐页推进",
+      "failure": "扫描版无文字时提示失败并移除记录",
+      "recovery": "重新选择文字版 PDF",
+      "evidence": "observed",
+      "testId": "T-10"
+    },
+    {
+      "id": "TR-56",
+      "from": "UPL-02",
+      "to": "UPL-04",
+      "trigger": "文本抽取完成",
+      "preconditions": [
+        "抽取成功"
+      ],
+      "read": [],
+      "write": [],
+      "effect": "进入规则拆分+AI 校准",
+      "feedback": "文案切换为 AI 校准中",
+      "failure": "AI 失败静默降级",
+      "recovery": "降级继续",
+      "evidence": "observed",
+      "testId": "T-10"
+    },
+    {
+      "id": "TR-10",
+      "from": "UPL-04",
+      "to": "UPL-03",
+      "trigger": "拆章与保存完成",
+      "preconditions": [
+        "规则拆分或 AI 校准成功"
+      ],
+      "read": [
+        "IndexedDB"
+      ],
+      "write": [
+        "courseList(ready)",
+        "activeCourse"
+      ],
+      "effect": "关闭弹窗，自动切换到新课程首页",
+      "feedback": "弹窗关闭+侧边栏新课程+章节列表替换",
+      "failure": "AI 校准失败自动降级，不影响此跳转",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-10"
+    },
+    {
+      "id": "TR-57",
+      "from": "UPL-03",
+      "to": "SEC-10",
+      "trigger": "点击上传课程的章节",
+      "preconditions": [
+        "activeCourse 为上传课程"
+      ],
+      "read": [
+        "IndexedDB chapterTexts"
+      ],
+      "write": [
+        "learningTelemetry"
+      ],
+      "effect": "打开章节文本视图",
+      "feedback": "摘要卡+全文渲染",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-10"
+    },
+    {
+      "id": "TR-11",
+      "from": "UPL-03",
+      "to": "HOM-01",
+      "trigger": "点击课程切换器「在线教育原理」",
+      "preconditions": [],
+      "read": [
+        "courseList"
+      ],
+      "write": [
+        "activeCourse=default"
+      ],
+      "effect": "切回默认课程",
+      "feedback": "章节列表恢复 8 章",
+      "failure": "未验证",
+      "recovery": "未验证",
+      "evidence": "observed",
+      "testId": "T-11"
+    }
+  ],
+  "entities": [
+    {
+      "name": "LearningUser",
+      "store": "localStorage.learningUser",
+      "fields": [
+        "name",
+        "role",
+        "goal"
+      ],
+      "notes": "登录时写入；退出登录清除"
+    },
+    {
+      "name": "LearningProfileAnswers",
+      "store": "localStorage.learningProfileAnswers",
+      "fields": [
+        "5 维度 × 4 题的 1-5 分"
+      ],
+      "notes": "画像与学伴匹配的输入"
+    },
+    {
+      "name": "MatchedAgent",
+      "store": "localStorage.matchedAgent",
+      "fields": [
+        "concept|task|scenario|discussion"
+      ],
+      "notes": "画像确认后写入，驱动首页/个人中心/学伴页"
+    },
+    {
+      "name": "Telemetry",
+      "store": "localStorage.learningTelemetry",
+      "fields": [
+        "资源打开、提问次数、讨论行为、协调器路由记录（按章分桶）"
+      ],
+      "notes": "反馈更新页的数据来源"
+    },
+    {
+      "name": "UploadedCourse",
+      "store": "localStorage.courseList + IndexedDB zbxk-courses",
+      "fields": [
+        "id",
+        "title",
+        "status(processing|ready)",
+        "chapters[id,title,summary,pageStart,pageEnd]"
+      ],
+      "notes": "结构在 localStorage；PDF 原文与章节全文在 IndexedDB"
+    },
+    {
+      "name": "SectionMessages",
+      "store": "localStorage.sectionMessages",
+      "fields": [
+        "每章最近 20 条对话"
+      ],
+      "notes": "含协调器决策标注"
+    },
+    {
+      "name": "CoordinatorDecisions",
+      "store": "localStorage.coordinatorDecisions",
+      "fields": [
+        "selectedAgent",
+        "secondaryAgent",
+        "reason",
+        "strategy"
+      ],
+      "notes": "每轮问答前写入，徽章展示"
+    },
+    {
+      "name": "SupportAdjustmentStatus",
+      "store": "localStorage.supportAdjustmentStatus",
+      "fields": [
+        "confirmed|deferred",
+        "周期时间戳"
+      ],
+      "notes": "周报弹窗确认/暂缓写入"
+    }
+  ],
+  "dataFlows": [
+    {
+      "id": "DF-01",
+      "name": "章节问答",
+      "path": "用户提问 → /api/section-chat → 注入当前章资源摘录（上传课程为该章全文 28000 字符上限）→ DeepSeek → Markdown 渲染回显",
+      "screens": [
+        "SEC-01",
+        "SEC-05",
+        "SEC-06",
+        "SEC-10"
+      ]
+    },
+    {
+      "id": "DF-02",
+      "name": "协调器路由",
+      "path": "用户提问 → /api/coordinator-chat → 画像+章节+任务+行为数据 → 结构化 JSON 路由决策 → 主学伴人设生成回答 → 展示理由；解析失败回退关键词规则",
+      "screens": [
+        "AGT-01",
+        "AGT-02"
+      ]
+    },
+    {
+      "id": "DF-03",
+      "name": "课程上传拆章",
+      "path": "PDF 文件 → pdf.js 浏览器端逐页抽取 → 章节标题正则切分 → （可选）LLM 校准标题与摘要 → IndexedDB 持久化 → courseList 更新 → 自动切换",
+      "screens": [
+        "UPL-01",
+        "UPL-02",
+        "UPL-04",
+        "UPL-03"
+      ]
+    },
+    {
+      "id": "DF-04",
+      "name": "画像识别闭环",
+      "path": "20 题量表 → 五维分值 → 主学伴匹配规则 → 画像确认 → 首页/个人中心/工具页联动 → 遥测持续写入 → 周报（优势/困难/画像变化）→ 学习者确认支持调整",
+      "screens": [
+        "DIA-10",
+        "DIA-20",
+        "HOM-01",
+        "PRF-01",
+        "FDB-01",
+        "FDB-02"
+      ]
+    }
+  ],
+  "coverage": {
+    "included": [
+      "登录弹窗",
+      "诊断测试：介绍/自动触发、5 个维度逐题作答、结果确认（7 屏）",
+      "课程首页两态（空画像/已匹配）",
+      "个人中心两态（空画像/有画像+雷达）",
+      "章节工作台：资源阅读/第2资源/讨论区/发帖成功/提问发送中/AI回答/上传课程章节文本（7 屏）",
+      "学伴匹配页与协调器决策卡（2 屏）",
+      "任务表现：任务页/提醒弹窗/手动重开（3 屏）",
+      "反馈更新页与周报弹窗（2 屏）",
+      "上传流程四态（弹窗/抽取/AI校准/完成切课）",
+      "课程切换（切回默认）"
+    ],
+    "merged": [
+      "DIA-01/DIA-02 为同一弹窗的两种触发方式，分列保留",
+      "TSK-02/TSK-03 为同一弹窗的自动/手动触发，分列保留"
+    ],
+    "excluded": [
+      "移动端布局（产品当前为桌面单栏自适应）",
+      "登录弹窗的身份下拉展开态（原生 select，无自定义样式）"
+    ],
+    "unverified": [
+      "网络失败时 AI 对话的报错恢复路径",
+      "同时上传多个课程时的切换顺序",
+      "重新识别差异后旧画像数据的清理"
+    ]
+  },
+  "limitations": [
+    "页面图为 2x 截图（PNG 栅格，2880×2000），不可编辑图层；语义模型与标注以 ue-spec 为准",
+    "示例数据（同学A/B帖子、演示任务）为原型内置演示内容",
+    "AI 回复依赖 .env.local 中的 API 配置；无 Key 时规则拆分仍可用，AI 问答返回配置提示",
+    "周报入口位于个人中心弹窗内（非反馈更新页直接按钮）"
+  ]
+}
