@@ -10,7 +10,7 @@ The platform builds an initial learner profile, matches the learner with an appr
 ## Live Demo
 
 **Cloudflare Pages:**  
-https://online-learning-platform-d4g.pages.dev
+https://zbxk.pages.dev
 <img width="3008" height="1548" alt="image" src="https://github.com/user-attachments/assets/8806a25d-028d-4d47-9d36-39406ee0fc9b" />
 <img width="1670" height="1460" alt="image" src="https://github.com/user-attachments/assets/fa3be824-e29a-4590-b0a6-602f113c8168" />
 
@@ -282,7 +282,7 @@ Learners can:
 - **Local backend:** Node.js native HTTP server
 - **AI model:** DeepSeek-compatible Chat Completions API (custom gateway supported)
 - **Serverless backend:** Cloudflare Pages Functions (`_worker.js` advanced mode)
-- **Deployment:** Cloudflare Pages (https://online-learning-platform-d4g.pages.dev)
+- **Deployment:** Cloudflare Pages (https://zbxk.pages.dev)
 - **PDF parsing:** pdf.js (browser-side text extraction)
 - **Structured data:** JSON, CSV
 - **Client-side persistence:** localStorage (course list, profile) + IndexedDB (uploaded PDFs and chapter texts)
