@@ -375,6 +375,10 @@ function renderUploadIntro() {
 }
 
 async function handleUploadFile(file) {
+  if (file.size > 80 * 1024 * 1024) {
+    alert("文件超过 80MB，请先压缩或拆分成几个小 PDF 再上传。");
+    return;
+  }
   const progress = qs("#upload-progress");
   const fill = qs("#upload-bar-fill");
   const textEl = qs("#upload-progress-text");

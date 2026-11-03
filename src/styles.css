@@ -122,7 +122,7 @@ button {
   width: 34px;
   height: 34px;
   font-size: 13px;
-  background: #6aa58f;
+  background: var(--mint);
 }
 
 .course-nav {
@@ -1092,7 +1092,7 @@ h3 {
 }
 
 .loop-step.active {
-  border-color: rgba(106, 165, 143, 0.55);
+  border-color: rgba(20, 184, 166, 0.55);
   background: #eef7f1;
 }
 
@@ -1506,7 +1506,7 @@ h3 {
   width: 46px;
   margin: 0 auto;
   border-radius: 999px 999px 8px 8px;
-  background: linear-gradient(180deg, #6aa58f, #4f6df5);
+  background: linear-gradient(180deg, var(--mint), var(--accent));
 }
 
 .tree-bar span {
@@ -1559,8 +1559,8 @@ h3 {
 }
 
 .radar-area {
-  fill: rgba(106, 165, 143, 0.28);
-  stroke: #6aa58f;
+  fill: rgba(20, 184, 166, 0.22);
+  stroke: var(--mint);
   stroke-width: 2;
 }
 
@@ -1820,7 +1820,7 @@ h3 {
 }
 
 .ig-message.teacher .ig-message-body {
-  border-color: rgba(106, 165, 143, 0.52);
+  border-color: rgba(20, 184, 166, 0.52);
   background: #eef7f1;
 }
 
