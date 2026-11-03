@@ -9,8 +9,8 @@ The platform builds an initial learner profile, matches the learner with an appr
 
 ## Live Demo
 
-**Netlify:**  
-https://zhibanxuejing-online-learning.netlify.app/
+**Cloudflare Pages:**  
+https://online-learning-platform-d4g.pages.dev
 <img width="3008" height="1548" alt="image" src="https://github.com/user-attachments/assets/8806a25d-028d-4d47-9d36-39406ee0fc9b" />
 <img width="1670" height="1460" alt="image" src="https://github.com/user-attachments/assets/fa3be824-e29a-4590-b0a6-602f113c8168" />
 
@@ -154,7 +154,9 @@ During learning, the **Coordinator Agent** can dynamically route each request to
 
 Course content is organized by chapter and integrated into one learning workspace.
 
-Learning resources may include:
+Learners can also **upload their own textbook PDF**: the platform extracts the text, splits it into chapters automatically (rule-based heading detection, refined by AI), and turns it into a fully usable course with per-chapter reading and Q&A.
+
+The built-in course resources include:
 
 - PPT/PDF materials;
 - textbook readings;
@@ -278,13 +280,26 @@ Learners can:
 
 - **Frontend:** HTML, CSS, Vanilla JavaScript
 - **Local backend:** Node.js native HTTP server
-- **AI model:** DeepSeek Chat Completions API
-- **Serverless backend:** Netlify Functions
-- **Deployment:** Netlify
+- **AI model:** DeepSeek-compatible Chat Completions API (custom gateway supported)
+- **Serverless backend:** Cloudflare Pages Functions (`_worker.js` advanced mode)
+- **Deployment:** Cloudflare Pages (https://online-learning-platform-d4g.pages.dev)
+- **PDF parsing:** pdf.js (browser-side text extraction)
 - **Structured data:** JSON, CSV
-- **Client-side persistence:** localStorage
+- **Client-side persistence:** localStorage (course list, profile) + IndexedDB (uploaded PDFs and chapter texts)
 - **Learning resources:** PPT, PDF
 - **Documentation:** Markdown
+
+## Multi-Course Support
+
+The platform ships with a built-in course and supports **user-uploaded courses**:
+
+1. Click **＋ 上传我的课程** in the sidebar or course home page;
+2. Select a text-based PDF (textbook, lecture notes);
+3. The browser extracts text via pdf.js, splits it into chapters by heading rules (第X章 / Chapter N / 一、…), then calls the AI to refine chapter boundaries and generate per-chapter summaries;
+4. The uploaded course appears in the sidebar — switch between the default course and uploaded courses at any time;
+5. Chapter Q&A on uploaded courses is grounded in the extracted chapter text.
+
+Uploaded files and chapter texts are stored in **IndexedDB** (client-side); course metadata lives in `localStorage`. No server-side storage is involved.
 
 ## Project Structure
 
@@ -292,23 +307,22 @@ Learners can:
 .
 ├── index.html
 ├── package.json
-├── netlify.toml
+├── netlify.toml          (kept for reference / Netlify-style local proxying)
+├── _worker.js            # Cloudflare Pages advanced-mode worker: all AI API routes
 │
 ├── src/
 │   ├── app.js
 │   └── styles.css
 │
+├── vendor/
+│   ├── pdf.min.mjs
+│   └── pdf.worker.min.mjs
+│
 ├── scripts/
-│   └── serve.mjs
+│   └── serve.mjs         # local dev server + AI API proxy
 │
 ├── netlify/
-│   └── functions/
-│       ├── agent-chat.js
-│       ├── coordinator-chat.js
-│       ├── deepseek.js
-│       ├── section-chat.js
-│       └── lib/
-│           └── deepseek-common.js
+│   └── functions/        # original Netlify-format handlers (used by serve.mjs)
 │
 ├── data/
 │   ├── knowledge/
@@ -339,12 +353,14 @@ Learners can:
 
 ### Directory Responsibilities
 
-- `src/` — frontend application code
-- `netlify/functions/` — serverless AI API endpoints
+- `src/` — frontend application code (including multi-course, upload and chapter-splitting logic)
+- `_worker.js` — Cloudflare Pages worker handling `/api/*` AI routes in production
+- `netlify/functions/` — shared AI prompt / routing logic, proxied by the local dev server
 - `data/` — structured data used by the application and AI generation pipeline
 - `resources/` — source course materials and learning assets
 - `docs/` — product and feature documentation
 - `public/` — static frontend assets
+- `vendor/` — vendored pdf.js for offline-safe browser-side PDF parsing
 
 ## Product Documentation
 
@@ -356,17 +372,38 @@ Learners can:
 Clone the repository:
 
 ```bash
-git clone https://github.com/tongshuy/online-learning-platform.git
+git clone https://github.com/hdhhduehdwbdf/online-learning-platform.git
 cd online-learning-platform
 ```
 
-Install dependencies:
+Start the local server (no dependencies to install — requires Node 18+):
 
 ```bash
-npm install
+npm run start
 ```
 
-Start the local server:
+Default local address:
+
+```text
+http://localhost:5174
+```
+
+To use a different port:
+
+```bash
+PORT=5176 node scripts/serve.mjs
+```
+
+## Local Development
+
+Clone the repository:
+
+```bash
+git clone https://github.com/hdhhduehdwbdf/online-learning-platform.git
+cd online-learning-platform
+```
+
+Start the local server (no dependencies to install — plain Node 18+):
 
 ```bash
 npm run start
@@ -386,50 +423,45 @@ PORT=5176 node scripts/serve.mjs
 
 ## AI Configuration
 
-AI requests are routed through the local backend or Netlify Functions so the API key stays on the server side.
+AI requests are routed through the local backend or the Cloudflare worker so the API key stays on the server side. Both support any OpenAI-compatible Chat Completions endpoint.
 
 Create a local environment file based on `.env.example`:
 
 ```text
-DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_API_KEY=your_api_key
 DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com
 ```
+
+- `DEEPSEEK_BASE_URL` — optional; defaults to DeepSeek official. Point it at any OpenAI-compatible gateway (e.g. `https://your-gateway.example/v1`).
+- `DEEPSEEK_MODEL` — model name; reasoning-style models work (the chapter-refine call budgets extra tokens for reasoning).
 
 Restart the local server after updating environment variables.
 
-For Netlify deployment, configure the same variables in:
+For Cloudflare Pages deployment, set the same variables as encrypted secrets:
 
-```text
-Netlify Site configuration
-→ Environment variables
-```
-
-Required variables:
-
-```text
-DEEPSEEK_API_KEY
-DEEPSEEK_MODEL
+```bash
+npx wrangler pages secret put DEEPSEEK_API_KEY --project-name online-learning-platform
+npx wrangler pages secret put DEEPSEEK_MODEL --project-name online-learning-platform
+npx wrangler pages secret put DEEPSEEK_BASE_URL --project-name online-learning-platform
 ```
 
 ## Deployment
 
-The project is deployed as a static frontend with Netlify Functions.
+The production site runs on **Cloudflare Pages** with `_worker.js` (advanced mode):
 
-API routes are mapped through `netlify.toml`:
+- static assets are served from the project root;
+- `/api/deepseek`, `/api/agent-chat`, `/api/coordinator-chat`, `/api/section-chat` are handled by `_worker.js`, which reuses the same prompts and coordinator routing logic as the local server.
 
-```text
-/api/deepseek
-→ /.netlify/functions/deepseek
+To deploy an update manually:
 
-/api/agent-chat
-→ /.netlify/functions/agent-chat
-
-/api/coordinator-chat
-→ /.netlify/functions/coordinator-chat
-
-/api/section-chat
-→ /.netlify/functions/section-chat
+```bash
+npx wrangler pages deploy . --project-name online-learning-platform --branch main
 ```
+
+(Keep large files out of the deploy directory — Cloudflare Pages caps assets at 25 MiB each; see `.wranglerignore` / deploy excludes.)
+
+The repository also keeps `netlify.toml` and `netlify/functions/` so the same handlers can run on Netlify if needed: `/api/*` maps to `/.netlify/functions/*` there.
 
 ## Security
 
@@ -442,7 +474,7 @@ API routes are mapped through `netlify.toml`:
 
 This project is a **functional product prototype**.
 
-The current version demonstrates the complete flow from learner diagnosis and AI companion matching to scenario-based learning, collaborative tasks, and feedback-driven profile updates.
+The current version demonstrates the complete flow from learner diagnosis and AI companion matching to scenario-based learning, collaborative tasks, and feedback-driven profile updates. It also supports **uploading any textbook PDF and learning it chapter by chapter** with AI-split structure and grounded chapter Q&A.
 
 Some analytics and collaboration behaviors are currently simulated or stored through `localStorage`.
 
@@ -453,4 +485,5 @@ Future development may include:
 - production collaboration infrastructure;
 - semantic/vector retrieval for course resources;
 - more robust learning analytics;
-- teacher-facing analytics dashboards.
+- teacher-facing analytics dashboards;
+- server-side course storage shared across devices.
