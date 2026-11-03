@@ -343,11 +343,10 @@ async function deleteUploadedCourse(courseId) {
   if (!confirmed) return;
   await idbDeleteCourse(courseId);
   saveUploadedCourseList(uploadedCourseList().filter((c) => c.id !== courseId));
-  if (activeCourseId() === courseId) {
-    switchCourse(DEFAULT_COURSE_ID);
-  } else {
-    renderApp();
-  }
+  switchCourse(DEFAULT_COURSE_ID);
+  state.activeView = "home";
+  save();
+  renderApp();
 }
 
 function openUploadDialog() {
