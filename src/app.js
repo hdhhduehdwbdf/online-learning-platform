@@ -1427,6 +1427,30 @@ function renderMessages(messages, emptyText) {
     .join("");
 }
 
+function refreshChatLogUnused() {}
+
+/* 只重绘聊天区，不重建整个页面（避免 PDF 阅读器重载、输入框失焦、滚动位置丢失） */
+function updateChatLog(logId, messages, emptyText) {
+  const log = qs(`#${logId}`);
+  if (!log) return;
+  log.innerHTML = renderMessages(messages, emptyText);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showChatPending(logId, pendingText) {
+  const log = qs(`#${logId}`);
+  if (!log) return;
+  const pending = document.createElement("div");
+  pending.className = "chat-bubble assistant chat-pending";
+  pending.innerHTML = `<span class="pending-dot"></span><span class="pending-dot"></span><span class="pending-dot"></span> ${escapeHtml(pendingText)}`;
+  log.appendChild(pending);
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearChatPending(logId) {
+  qs(`#${logId} .chat-pending`)?.remove();
+}
+
 function renderScenarioPartnerPanel(section, scenario) {
   const key = taskStateKey(section);
   const input = state.scenarioSupportInputs[key] || {};
@@ -2294,7 +2318,9 @@ async function sendAgentMessage(message) {
     lastCompanionUsed: state.matchedAgent,
     matchedCompanionQuestions: (chapterTelemetry(state.selectedSection).matchedCompanionQuestions || 0) + 1,
   });
-  renderApp();
+  save();
+  updateChatLog("agent-chat-log", state.agentMessages, "匹配AI学伴会根据后台规则为你提供学习支持。");
+  showChatPending("agent-chat-log", "思考中…");
   try {
     const response = await fetch("/api/coordinator-chat", {
       method: "POST",
@@ -2321,8 +2347,9 @@ async function sendAgentMessage(message) {
   } catch (error) {
     state.agentMessages.push({ role: "assistant", content: `调用失败：${error.message}` });
   }
+  clearChatPending("agent-chat-log");
   save();
-  renderApp();
+  updateChatLog("agent-chat-log", state.agentMessages, "匹配AI学伴会根据后台规则为你提供学习支持。页面只展示角色说明和对话内容。");
 }
 
 async function sendSectionMessage(section, message) {
@@ -2336,7 +2363,10 @@ async function sendSectionMessage(section, message) {
     sectionCompanionQuestions: (chapterTelemetry(section.id).sectionCompanionQuestions || 0) + 1,
     talkedBeforeDiscussionPost: discussionMode ? true : chapterTelemetry(section.id).talkedBeforeDiscussionPost,
   });
-  renderApp();
+  save();
+  save();
+  updateChatLog("section-chat-log", messages, emptyHintForSection(section));
+  showChatPending("section-chat-log", "思考中…");
   try {
     let sectionPayload;
     if (!discussionMode && !currentCourse().builtin) {
@@ -2374,8 +2404,23 @@ async function sendSectionMessage(section, message) {
     messages.push({ role: "assistant", content: `调用失败：${error.message}` });
   }
   state.sectionMessages[section.id] = messages.slice(-20);
+  clearChatPending("section-chat-log");
   save();
-  renderApp();
+  updateChatLog("section-chat-log", state.sectionMessages[section.id] || messages, emptyHintForSection(section));
+  renderConceptTriggerIfNew(section);
+}
+
+function emptyHintForSection(section) {
+  return isDiscussionSelected(section) ? "把你的初步想法告诉我，我可以帮你整理成一段适合讨论区发布的发言。" : "你可以问本章知识点、概念区别、资源中的例子或复习重点。";
+}
+
+/* 概念触发卡依赖提问次数；聊天不整页刷新时单独检查并按需插入 */
+function renderConceptTriggerIfNew(section) {
+  const card = renderConceptTriggerCard(section);
+  if (!card) return;
+  const aiPanel = qs(".section-ai");
+  if (!aiPanel || aiPanel.querySelector(".concept-trigger")) return;
+  aiPanel.querySelector(".chat-log")?.insertAdjacentHTML("beforebegin", card);
 }
 
 function escapeHtml(text) {
