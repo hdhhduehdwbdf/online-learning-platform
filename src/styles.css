@@ -2279,7 +2279,7 @@ h3 {
   line-height: 1.6;
 }
 
-.upload-progress {
+.upload-progress:not([hidden]) {
   margin-top: 14px;
   display: grid;
   gap: 8px;
@@ -2415,4 +2415,51 @@ h3 {
 .chat-bubble p {
   margin: 0;
   line-height: 1.7;
+}
+
+/* 课程选项行 + 删除按钮 */
+.course-option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  transition: all 0.15s ease;
+}
+
+.course-option-row:hover {
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.course-option-row .course-option {
+  border: 0;
+  box-shadow: none;
+}
+
+.course-option-row.active {
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(79, 109, 245, 0.12);
+}
+
+.course-delete-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.course-option-row:hover .course-delete-btn {
+  opacity: 1;
+}
+
+.course-delete-btn:hover {
+  color: var(--coral);
+  background: rgba(240, 101, 79, 0.1);
 }

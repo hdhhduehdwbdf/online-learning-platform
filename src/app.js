@@ -109,7 +109,7 @@ function resourcesForSection(sectionId) {
   const chapter = chapters.find((c) => c.id === sectionId);
   if (!chapter) return [];
   const list = [];
-  if (chapter.summary) list.push({ type: "AI拆章", label: `${chapter.title}（AI 拆章摘要）`, summary: chapter.summary, text: chapter.text || "" });
+  if (chapter.summary) list.push({ type: "AI拆章", label: `${chapter.title}（AI 拆章摘要）`, summary: chapter.summary, text: chapter.text || "", objectKey: `course-${course.id}-chapter-${chapter.id}` });
   list.push({ type: "PDF", label: `${course.title}.pdf · ${chapter.title}`, objectKey: `course-${course.id}-chapter-${chapter.id}`, chapterId: sectionId });
   return list;
 }
@@ -323,14 +323,31 @@ function renderCourseSwitch() {
       ${list
         .map(
           (c) => `
-        <button class="course-option ${active === c.id ? "active" : ""}" data-course="${c.id}" ${c.status !== "ready" ? "disabled" : ""}>
-          <strong>${escapeHtml(c.title || "解析中…")}</strong>
-          <small>${c.status === "processing" ? `拆章中…` : `${(c.chapters || []).length} 章 · 上传课程`}</small>
-        </button>`,
+        <div class="course-option-row ${active === c.id ? "active" : ""}">
+          <button class="course-option ${active === c.id ? "active" : ""}" data-course="${c.id}" ${c.status !== "ready" ? "disabled" : ""}>
+            <strong>${escapeHtml(c.title || "解析中…")}</strong>
+            <small>${c.status === "processing" ? `拆章中…` : `${(c.chapters || []).length} 章 · 上传课程`}</small>
+          </button>
+          <button class="course-delete-btn" data-course-delete="${c.id}" title="删除课程" aria-label="删除课程">×</button>
+        </div>`,
         )
         .join("")}
     </div>
   `;
+}
+
+async function deleteUploadedCourse(courseId) {
+  const course = uploadedCourseList().find((c) => c.id === courseId);
+  const chapterCount = (course?.chapters || []).length;
+  const confirmed = window.confirm(`确定删除课程「${course?.title || courseId}」（${chapterCount} 章）吗？删除后无法恢复。`);
+  if (!confirmed) return;
+  await idbDeleteCourse(courseId);
+  saveUploadedCourseList(uploadedCourseList().filter((c) => c.id !== courseId));
+  if (activeCourseId() === courseId) {
+    switchCourse(DEFAULT_COURSE_ID);
+  } else {
+    renderApp();
+  }
 }
 
 function openUploadDialog() {
@@ -818,7 +835,7 @@ function strongestAgentForQuestion(question) {
 function renderProfileRadar(values = profileRadarValues()) {
   const size = 330;
   const center = size / 2;
-  const maxRadius = 104;
+  const maxRadius = 96;
   const axisCount = values.length;
   const pointFor = (index, radius) => {
     const angle = -Math.PI / 2 + (Math.PI * 2 * index) / axisCount;
@@ -830,8 +847,9 @@ function renderProfileRadar(values = profileRadarValues()) {
   const axes = values
     .map((item, index) => {
       const [x, y] = pointFor(index, maxRadius);
-      const [lx, ly] = pointFor(index, maxRadius + 38);
-      return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" /><text x="${lx}" y="${ly}">${item.name}</text>`;
+      const [lx, ly] = pointFor(index, maxRadius + 42);
+      const anchor = lx < center - 8 ? "end" : lx > center + 8 ? "start" : "middle";
+      return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" /><text x="${lx}" y="${ly}" text-anchor="${anchor}">${item.name}</text>`;
     })
     .join("");
   const area = values.map((item, index) => pointFor(index, (item.value / 100) * maxRadius).join(",")).join(" ");
@@ -1094,7 +1112,6 @@ function renderResourcePreview(section) {
             <p class="eyebrow">正在阅读 · 上传课程</p>
             <h2>${escapeHtml(resource.label)}</h2>
           </div>
-          <span class="ghost-btn" id="open-chapter-text">查看章节文本</span>
         </div>
         <div class="resource-viewer upload-text-viewer" id="chapter-text-viewer">
           <p class="muted">正在从浏览器存储读取章节文本…</p>
@@ -2389,6 +2406,10 @@ document.addEventListener("click", (event) => {
     save();
     renderApp();
     mountChapterText(section);
+  }
+  if (button.dataset.courseDelete) {
+    deleteUploadedCourse(button.dataset.courseDelete);
+    return;
   }
   if (button.dataset.course) {
     switchCourse(button.dataset.course);
